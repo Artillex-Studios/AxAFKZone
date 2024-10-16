@@ -10,14 +10,16 @@ import java.util.Locale;
 import static com.artillexstudios.axafkzone.AxAFKZone.CONFIG;
 
 public class NumberUtils {
-    private static NumberFormat formatter = new DecimalFormat(CONFIG.getString("number-formatting.formatted", "#,###.##"));
-    private static NumberFormat shortFormat = new DecimalFormat(CONFIG.getString("number-formatting.formatted", "#,###.##"));
+    private static NumberFormat formatter;
+    private static NumberFormat shortFormat;
 
     public static void reload() {
-        final String[] lang = CONFIG.getString("number-formatting.short", "en_US").split("_");
+        String[] lang = CONFIG.getString("number-formatting.short", "en_US").split("_");
         shortFormat = DecimalFormat.getCompactNumberInstance(new Locale(lang[0], lang[1]), NumberFormat.Style.SHORT);
+        updateFormatter(CONFIG.getInt("number-formatting.mode", 0));
+    }
 
-        int mode = CONFIG.getInt("number-formatting.mode", 0);
+    private static void updateFormatter(int mode) {
         switch (mode) {
             case 0:
                 formatter = new DecimalFormat(CONFIG.getString("number-formatting.formatted", "#,###.##"));
@@ -28,11 +30,14 @@ public class NumberUtils {
             case 2:
                 formatter = null;
                 break;
+            default:
+                formatter = new DecimalFormat(CONFIG.getString("number-formatting.formatted", "#,###.##"));
+                break;
         }
     }
 
     public static String formatNumber(double number) {
-        return formatter == null ? "" + number : formatter.format(number);
+        return formatter == null ? String.valueOf(number) : formatter.format(number);
     }
 
     @Nullable

@@ -23,81 +23,92 @@ import static java.time.temporal.ChronoUnit.SECONDS;
 
 public class UpdateNotifier implements Listener {
     private final int id;
-    private final String current;
+    private final String currentVersion;
     private final AxPlugin instance;
-    private String latest = null;
-    private boolean newest = true;
+    private String latestVersion = null;
+    private boolean isNewest = true;
 
     public UpdateNotifier(AxPlugin instance, int id) {
         this.id = id;
-        this.current = instance.getDescription().getVersion();
+        this.currentVersion = instance.getDescription().getVersion();
         this.instance = instance;
 
         instance.getServer().getPluginManager().registerEvents(this, instance);
+        scheduleVersionCheck();
+    }
 
+    private void scheduleVersionCheck() {
         long time = 30L * 60L * 20L;
         Scheduler.get().runAsyncTimer(t -> {
-            this.latest = readVersion();
-            this.newest = isLatest(current);
+            latestVersion = fetchLatestVersion();
+            isNewest = isLatest(currentVersion);
 
-            if (latest == null || newest) return;
-            Scheduler.get().runLaterAsync(t2 -> {
-                Bukkit.getConsoleSender().sendMessage(getMessage());
-            }, 50L);
-            t.cancel();
+            if (latestVersion != null && !isNewest) {
+                notifyConsole();
+                t.cancel();
+            }
         }, 0, time);
     }
 
-    @EventHandler
-    public void onJoin(PlayerJoinEvent event) {
-        if (latest == null || newest) return;
-        if (!CONFIG.getBoolean("update-notifier.on-join", true)) return;
-        if (!event.getPlayer().hasPermission(instance.getName().toLowerCase() + ".update-notify")) return;
+    private void notifyConsole() {
         Scheduler.get().runLaterAsync(t -> {
-            event.getPlayer().sendMessage(getMessage());
+            Bukkit.getConsoleSender().sendMessage(getNotificationMessage());
         }, 50L);
     }
 
-    private String getMessage() {
-        HashMap<String, String> map = new HashMap<>();
-        map.put("%current%", current);
-        map.put("%latest%", latest);
-        return StringUtils.formatToString(CONFIG.getString("prefix") + LANG.getString("update-notifier"), map);
+    @EventHandler
+    public void onPlayerJoin(PlayerJoinEvent event) {
+        if (latestVersion == null || isNewest || !CONFIG.getBoolean("update-notifier.on-join", true)
+                || !event.getPlayer().hasPermission(instance.getName().toLowerCase() + ".update-notify")) {
+            return;
+        }
+
+        Scheduler.get().runLaterAsync(t -> {
+            event.getPlayer().sendMessage(getNotificationMessage());
+        }, 50L);
+    }
+
+    private String getNotificationMessage() {
+        HashMap<String, String> placeholders = new HashMap<>();
+        placeholders.put("%current%", currentVersion);
+        placeholders.put("%latest%", latestVersion);
+        return StringUtils.formatToString(CONFIG.getString("prefix") + LANG.getString("update-notifier"), placeholders);
     }
 
     @Nullable
-    private String readVersion() {
+    private String fetchLatestVersion() {
         try {
-            final HttpClient client = HttpClient.newHttpClient();
-            final HttpRequest request = HttpRequest.newBuilder()
+            HttpClient client = HttpClient.newHttpClient();
+            HttpRequest request = HttpRequest.newBuilder()
                     .uri(new URI("https://api.polymart.org/v1/getResourceInfoSimple/?resource_id=" + id + "&key=version"))
                     .timeout(Duration.of(10, SECONDS))
                     .GET()
                     .build();
 
-            final HttpResponse<?> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            return response.body().toString();
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            return response.body();
         } catch (Exception ex) {
             return null;
         }
     }
 
-    public String getLatest() {
-        return latest;
+    public String getLatestVersion() {
+        return latestVersion;
     }
 
     public boolean isLatest(String current) {
-        return getWeight(latest) <= getWeight(current);
+        return getVersionWeight(latestVersion) <= getVersionWeight(current);
     }
 
-    private int getWeight(String version) {
+    private int getVersionWeight(String version) {
         if (version == null) return 0;
-        String[] s = version.split("\\.");
-        if (!NumberUtils.isInt(s[0]) || !NumberUtils.isInt(s[1]) || !NumberUtils.isInt(s[2])) return 0;
-        int res = 0;
-        res += Integer.parseInt(s[0]) * 1000000;
-        res += Integer.parseInt(s[1]) * 1000;
-        res += Integer.parseInt(s[2]);
-        return res;
+        String[] parts = version.split("\\.");
+        if (parts.length < 3 || !NumberUtils.isInt(parts[0]) || !NumberUtils.isInt(parts[1]) || !NumberUtils.isInt(parts[2])) {
+            return 0;
+        }
+
+        return Integer.parseInt(parts[0]) * 1000000 +
+                Integer.parseInt(parts[1]) * 1000 +
+                Integer.parseInt(parts[2]);
     }
 }

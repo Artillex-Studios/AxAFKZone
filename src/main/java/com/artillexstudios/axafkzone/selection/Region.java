@@ -22,19 +22,21 @@ public class Region {
         this.world = corner1.getWorld();
         this.zone = zone;
 
-        this.center = new Location(corner1.getWorld(), (corner1.getBlockX() + corner2.getBlockX()) / 2D, (corner1.getBlockY() + corner2.getBlockY()) / 2D, (corner1.getBlockZ() + corner2.getBlockZ()) / 2D);
+        this.center = new Location(world,
+                (corner1.getBlockX() + corner2.getBlockX()) / 2D,
+                (corner1.getBlockY() + corner2.getBlockY()) / 2D,
+                (corner1.getBlockZ() + corner2.getBlockZ()) / 2D);
     }
 
     public HashSet<Player> getPlayersInZone() {
-        final HashSet<Player> players = new HashSet<>();
-
+        HashSet<Player> players = new HashSet<>();
         String permission = zone.getSettings().getString("permission");
+
         for (Player player : Bukkit.getOnlinePlayers()) {
             if (!permission.isBlank() && !player.hasPermission(permission)) continue;
             if (!player.getWorld().equals(world)) continue;
 
-            final Location loc = player.getLocation();
-
+            Location loc = player.getLocation();
             int x1 = Math.min(corner1.getBlockX(), corner2.getBlockX());
             int y1 = Math.min(corner1.getBlockY(), corner2.getBlockY());
             int z1 = Math.min(corner1.getBlockZ(), corner2.getBlockZ());
@@ -42,12 +44,18 @@ public class Region {
             int y2 = Math.max(corner1.getBlockY(), corner2.getBlockY());
             int z2 = Math.max(corner1.getBlockZ(), corner2.getBlockZ());
 
-            if (!(loc.getBlockX() >= x1 && loc.getBlockX() <= x2 && loc.getBlockY() >= y1 && loc.getBlockY() <= y2 && loc.getBlockZ() >= z1 && loc.getBlockZ() <= z2)) continue;
-
-            players.add(player);
+            if (isPlayerInZone(loc, x1, y1, z1, x2, y2, z2)) {
+                players.add(player);
+            }
         }
 
         return players;
+    }
+
+    private boolean isPlayerInZone(Location loc, int x1, int y1, int z1, int x2, int y2, int z2) {
+        return loc.getBlockX() >= x1 && loc.getBlockX() <= x2 &&
+                loc.getBlockY() >= y1 && loc.getBlockY() <= y2 &&
+                loc.getBlockZ() >= z1 && loc.getBlockZ() <= z2;
     }
 
     @NotNull

@@ -10,27 +10,28 @@ public enum Libraries {
     private final Library library;
 
     public Library getLibrary() {
-        return this.library;
+        return library;
     }
 
     Libraries(String lib, Relocation relocation) {
-        String[] split = lib.split(":");
-
-        library = Library.builder()
-                .groupId(split[0])
-                .artifactId(split[1])
-                .version(split[2])
-                .relocate(relocation)
-                .build();
+        this.library = createLibrary(lib, relocation);
     }
 
     Libraries(String lib) {
-        String[] split = lib.split(":");
+        this.library = createLibrary(lib, null);
+    }
 
-        library = Library.builder()
+    private Library createLibrary(String lib, Relocation relocation) {
+        String[] split = lib.split(":");
+        Library.Builder builder = Library.builder()
                 .groupId(split[0])
                 .artifactId(split[1])
-                .version(split[2])
-                .build();
+                .version(split[2]);
+
+        if (relocation != null) {
+            builder.relocate(relocation);
+        }
+
+        return builder.build();
     }
 }

@@ -28,34 +28,42 @@ public class WandListeners implements Listener {
 
     @EventHandler
     public void onInteract(@NotNull PlayerInteractEvent event) {
-        if (event.getClickedBlock() == null) return;
-        if (event.getItem() == null || event.getItem().getType().equals(Material.AIR)) return;
-        if (event.getPlayer().getInventory().getItemInMainHand().getType().equals(Material.AIR)) return;
-        if (!Boolean.TRUE.equals(NBTUtils.readBooleanFromNBT(event.getPlayer().getInventory().getItemInMainHand(), "axafkzone-wand"))) return;
-        event.setCancelled(true);
+        Player player = event.getPlayer();
+        if (!isValidInteraction(event)) return;
 
-        if (event.getAction().equals(Action.LEFT_CLICK_BLOCK)) {
-            onLeftClick(event.getPlayer(), event.getClickedBlock().getLocation());
-        } else if (event.getAction().equals(Action.RIGHT_CLICK_BLOCK)) {
-            onRightClick(event.getPlayer(), event.getClickedBlock().getLocation());
+        event.setCancelled(true);
+        Location clickedLocation = event.getClickedBlock().getLocation();
+
+        if (event.getAction() == Action.LEFT_CLICK_BLOCK) {
+            handleSelection(player, clickedLocation, true);
+        } else if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
+            handleSelection(player, clickedLocation, false);
         }
     }
 
-    private void onLeftClick(@NotNull Player player, @NotNull Location location) {
-        if (!selections.containsKey(player)) selections.put(player, new Selection());
-        if (Objects.equals(selections.get(player).getPosition1(), location)) return;
-
-        player.setCooldown(player.getInventory().getItemInMainHand().getType(), 5);
-        selections.get(player).setPosition1(location);
-        MESSAGEUTILS.sendLang(player, "selection.pos1", Collections.singletonMap("%location%", Serializers.LOCATION.serialize(location)));
+    private boolean isValidInteraction(PlayerInteractEvent event) {
+        return event.getClickedBlock() != null &&
+                event.getItem() != null &&
+                !event.getItem().getType().equals(Material.AIR) &&
+                event.getPlayer().getInventory().getItemInMainHand().getType() != Material.AIR &&
+                Boolean.TRUE.equals(NBTUtils.readBooleanFromNBT(event.getPlayer().getInventory().getItemInMainHand(), "axafkzone-wand"));
     }
 
-    private void onRightClick(@NotNull Player player, @NotNull Location location) {
-        if (!selections.containsKey(player)) selections.put(player, new Selection());
-        if (Objects.equals(selections.get(player).getPosition2(), location)) return;
+    private void handleSelection(@NotNull Player player, @NotNull Location location, boolean isLeftClick) {
+        selections.computeIfAbsent(player, k -> new Selection());
+
+        Selection selection = selections.get(player);
+        Location currentPos = isLeftClick ? selection.getPosition1() : selection.getPosition2();
+
+        if (Objects.equals(currentPos, location)) return;
 
         player.setCooldown(player.getInventory().getItemInMainHand().getType(), 5);
-        selections.get(player).setPosition2(location);
-        MESSAGEUTILS.sendLang(player, "selection.pos2", Collections.singletonMap("%location%", Serializers.LOCATION.serialize(location)));
+        if (isLeftClick) {
+            selection.setPosition1(location);
+            MESSAGEUTILS.sendLang(player, "selection.pos1", Collections.singletonMap("%location%", Serializers.LOCATION.serialize(location)));
+        } else {
+            selection.setPosition2(location);
+            MESSAGEUTILS.sendLang(player, "selection.pos2", Collections.singletonMap("%location%", Serializers.LOCATION.serialize(location)));
+        }
     }
 }

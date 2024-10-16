@@ -10,12 +10,12 @@ import java.util.HashMap;
 import java.util.List;
 
 public class RandomUtils {
-    public static Reward randomValue(@NotNull HashMap<Reward, Double> map) {
-        List<Pair<Reward, Double>> list = new ArrayList<>();
-        map.forEach((key, value) -> list.add(new Pair<>(key, value)));
+    public static Reward randomValue(@NotNull HashMap<Reward, Double> rewardMap) {
+        List<Pair<Reward, Double>> rewardPairs = new ArrayList<>();
+        rewardMap.forEach((reward, weight) -> rewardPairs.add(new Pair<>(reward, weight)));
 
-        EnumeratedDistribution<Reward> e = new EnumeratedDistribution<>(list);
+        EnumeratedDistribution<Reward> distribution = new EnumeratedDistribution<>(rewardPairs);
 
-        return e.sample();
+        return distribution.sample();
     }
 }

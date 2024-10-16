@@ -14,39 +14,48 @@ import java.io.File;
 public class FileUtils {
 
     public static void loadAll() {
-        final File path = new File(AxAFKZone.getInstance().getDataFolder(), "zones");
-        if (path.exists()) {
-            for (File file : path.listFiles()) {
-                final String fileName = file.getName().replace(".yml", "");
-                final Zone zone = Zones.getZoneByName(fileName);
-                if (zone != null) {
-                    zone.reload();
-                    Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#CC0055╠ &#FF8855Reloaded zone &f%name%&#FF8855!".replace("%name%", fileName)));
-                    continue;
-                }
+        File path = new File(AxAFKZone.getInstance().getDataFolder(), "zones");
+        if (!path.exists()) return;
 
-                load(fileName);
-                Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#CC0055╠ &#FF8855Loaded zone &f%name%&#FF8855!".replace("%name%", fileName)));
+        for (File file : path.listFiles()) {
+            String fileName = file.getName().replace(".yml", "");
+            Zone zone = Zones.getZoneByName(fileName);
+            if (zone != null) {
+                zone.reload();
+                sendReloadedMessage(fileName);
+                continue;
             }
+            loadZone(fileName);
+            sendLoadedMessage(fileName);
         }
     }
 
     public static void create(String zoneName, Selection selection) {
-        final Config config = new Config(new File(AxAFKZone.getInstance().getDataFolder(), "zones/" + zoneName + ".yml"), AxAFKZone.getInstance().getResource("zones/example-zone.yml"));
+        Config config = new Config(new File(AxAFKZone.getInstance().getDataFolder(), "zones/" + zoneName + ".yml"), AxAFKZone.getInstance().getResource("zones/example-zone.yml"));
         config.set("zone.location1", Serializers.LOCATION.serialize(selection.getPosition1()));
         config.set("zone.location2", Serializers.LOCATION.serialize(selection.getPosition2()));
         config.save();
-        load(zoneName);
+        loadZone(zoneName);
     }
 
-    public static void load(String zoneName) {
-        final Config config = new Config(new File(AxAFKZone.getInstance().getDataFolder(), "zones/" + zoneName + ".yml"));
-        final Zone zone = new Zone(zoneName, config);
+    public static void loadZone(String zoneName) {
+        Config config = new Config(new File(AxAFKZone.getInstance().getDataFolder(), "zones/" + zoneName + ".yml"));
+        Zone zone = new Zone(zoneName, config);
         Zones.addZone(zone);
     }
 
     public static void delete(Zone zone) {
-        new File(AxAFKZone.getInstance().getDataFolder(), "zones/" + zone.getName() + ".yml").delete();
-        Zones.removeZone(zone);
+        File zoneFile = new File(AxAFKZone.getInstance().getDataFolder(), "zones/" + zone.getName() + ".yml");
+        if (zoneFile.delete()) {
+            Zones.removeZone(zone);
+        }
+    }
+
+    private static void sendReloadedMessage(String zoneName) {
+        Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#CC0055╠ &#FF8855Reloaded zone &f%name%&#FF8855!".replace("%name%", zoneName)));
+    }
+
+    private static void sendLoadedMessage(String zoneName) {
+        Bukkit.getConsoleSender().sendMessage(StringUtils.formatToString("&#CC0055╠ &#FF8855Loaded zone &f%name%&#FF8855!".replace("%name%", zoneName)));
     }
 }
