@@ -1,15 +1,16 @@
 package com.artillexstudios.axafkzone.zones;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Zones {
-    private static final HashMap<String, Zone> zones = new HashMap<>();
+    private static final Map<String, Zone> zones = new ConcurrentHashMap<>();
 
     @NotNull
-    public static HashMap<String, Zone> getZones() {
+    public static Map<String, Zone> getZones() {
         return zones;
     }
 
@@ -17,7 +18,7 @@ public class Zones {
         zones.put(zone.getName(), zone);
     }
 
-    @Nullable
+    @NotNull
     public static Zone getZoneByName(@NotNull String name) {
         if (!zones.containsKey(name)) return null;
         return zones.get(name);

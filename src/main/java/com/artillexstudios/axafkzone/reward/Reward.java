@@ -8,7 +8,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -18,26 +18,22 @@ public class Reward {
     private final double chance;
     private final String display;
 
-    public Reward(Map<Object, Object> str) {
-        final List<String> commands = (List<String>) str.getOrDefault("commands", new ArrayList<>());
-        final ArrayList<ItemStack> items = new ArrayList<>();
-        double chance = (double) str.get("chance");
+    public Reward(Map<Object, Object> data) {
+        this.commands = (List<String>) data.getOrDefault("commands", Collections.emptyList());
+        this.items = buildItems(data);
+        this.chance = (double) data.getOrDefault("chance", 0.0);
+        this.display = (String) data.getOrDefault("display", null);
+    }
 
-        var map = (List<Map<Object, Object>>) str.get("items");
-        if (map != null) {
-            final LinkedList<Map<Object, Object>> map2 = new LinkedList<>(map);
-            for (Map<Object, Object> it : map2) {
-                items.add(new ItemBuilder(it).get());
-            }
+    private List<ItemStack> buildItems(Map<Object, Object> data) {
+        List<Map<Object, Object>> itemData = (List<Map<Object, Object>>) data.get("items");
+        if (itemData == null) return Collections.emptyList();
+
+        List<ItemStack> builtItems = new ArrayList<>(itemData.size());
+        for (Map<Object, Object> itemMap : itemData) {
+            builtItems.add(new ItemBuilder(itemMap).get());
         }
-
-        String display = null;
-        if (str.containsKey("display")) display = (String) str.get("display");
-
-        this.chance = chance;
-        this.items = items;
-        this.commands = commands;
-        this.display = display;
+        return builtItems;
     }
 
     public List<String> getCommands() {
@@ -58,15 +54,16 @@ public class Reward {
 
     public void run(Player player) {
         Scheduler.get().runAt(player.getLocation(), scheduledTask -> {
-            for (String cmd : commands) {
-                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd.replace("%player%", player.getName()));
-            }
+            commands.forEach(cmd ->
+                    Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd.replace("%player%", player.getName()))
+            );
         });
         ContainerUtils.INSTANCE.addOrDrop(player.getInventory(), items, player.getLocation());
     }
 
     @Override
     public String toString() {
-        return "Reward{" + "commands=" + commands + ", items=" + items + ", chance=" + chance + '}';
+        return String.format("Reward{commands=%s, items=%s, chance=%.2f, display=%s}",
+                commands, items, chance, display != null ? display : "none");
     }
 }

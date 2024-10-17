@@ -16,13 +16,9 @@ import com.artillexstudios.axapi.utils.Title;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 import static com.artillexstudios.axafkzone.AxAFKZone.CONFIG;
 import static com.artillexstudios.axafkzone.AxAFKZone.MESSAGEUTILS;
@@ -36,121 +32,136 @@ public class Zone {
     private final MessageUtils msg;
     private int rewardSeconds;
     private int rollAmount;
-    private final LinkedList<Reward> rewards = new LinkedList<>();
+    private final List<Reward> rewards = new ArrayList<>();
     private final Cooldown<Player> cooldown = new Cooldown<>();
 
     public Zone(String name, Config settings) {
         this.name = name;
         this.settings = settings;
         this.msg = new MessageUtils(settings.getBackingDocument(), "prefix", CONFIG.getBackingDocument());
-        this.region = new Region(Serializers.LOCATION.deserialize(settings.getString("zone.location1")), Serializers.LOCATION.deserialize(settings.getString("zone.location2")), this);
+        this.region = new Region(Serializers.LOCATION.deserialize(settings.getString("zone.location1")),
+                Serializers.LOCATION.deserialize(settings.getString("zone.location2")), this);
         reload();
     }
 
     public void tick() {
         boolean runChecks = ++ticks % 20 == 0;
 
-        final Set<Player> players = region.getPlayersInZone();
-        for (Player player : zonePlayers.keySet()) {
+        var players = region.getPlayersInZone();
+        zonePlayers.forEach((player, time) -> {
             if (player.isDead() || !player.isOnline()) {
                 Scheduler.get().run(t -> zonePlayers.remove(player));
-                continue;
+                return;
             }
 
-            // player left
             if (!players.contains(player)) {
-                msg.sendLang(player, "messages.left", Map.of("%time%", TimeUtils.fancyTime(zonePlayers.get(player) * 1_000L)));
+                msg.sendLang(player, "messages.left", Map.of("%time%", TimeUtils.fancyTime(time * 1_000L)));
                 Scheduler.get().run(t -> zonePlayers.remove(player));
-                continue;
+                return;
             }
 
             if (runChecks) {
-                int newTime = zonePlayers.get(player) + 1;
-                zonePlayers.put(player, newTime);
+                var newTime = zonePlayers.computeIfPresent(player, (p, t) -> t + 1);
 
-                if (newTime != 0 && newTime % rewardSeconds == 0) {
-                    final List<Reward> rewardList = giveRewards(player);
+                if (newTime != null && newTime % rewardSeconds == 0) {
+                    var rewardList = giveRewards(player);
+                    sendRewardMessages(player, rewardList, newTime);
 
-                    if (!settings.getStringList("messages.reward").isEmpty()) {
-                        final String prefix = CONFIG.getString("prefix");
-                        boolean first = true;
-                        for (String string : settings.getStringList("messages.reward")) {
-                            if (first) {
-                                string = prefix + string;
-                                first = false;
-                            }
-
-                            if (string.contains("%reward%")) {
-                                for (Reward reward : rewardList) {
-                                    player.sendMessage(StringUtils.formatToString(string, Map.of("%reward%", reward.getDisplay(), "%time%", TimeUtils.fancyTime(newTime * 1_000L))));
-                                }
-                                continue;
-                            }
-                            player.sendMessage(StringUtils.formatToString(string, Map.of("%time%", TimeUtils.fancyTime(newTime * 1_000L))));
-                        }
+                    if (CONFIG.getBoolean("reset-after-reward", false)) {
+                        zonePlayers.put(player, 0);
                     }
-
-                    if (CONFIG.getBoolean("reset-after-reward", false)) zonePlayers.put(player, 0);
                 }
             }
+
+            sendTitleAndActionbar(player, timeUntilNext(player));
             players.remove(player);
+        });
 
-            String zoneTitle = settings.getString("in-zone.title", null);
-            String zoneSubTitle = settings.getString("in-zone.subtitle", null);
-            if (zoneTitle != null && !zoneTitle.isBlank() || zoneSubTitle != null && !zoneSubTitle.isBlank()) {
-                Title title = NMSHandlers.getNmsHandler()
-                        .newTitle(
-                                zoneTitle == null ? Component.empty() : StringUtils.format(zoneTitle.replace("%time%", TimeUtils.fancyTime(timeUntilNext(player)))),
-                                zoneSubTitle == null ? Component.empty() : StringUtils.format(zoneSubTitle.replace("%time%", TimeUtils.fancyTime(timeUntilNext(player)))),
-                                0,
-                                10,
-                                0
-                        );
-                title.send(player);
-            }
+        handleNewPlayers(players);
+    }
 
-            String zoneActionbar = settings.getString("in-zone.actionbar", null);
-            if (zoneActionbar != null && !zoneActionbar.isBlank()) {
-                ActionBar actionBar = NMSHandlers.getNmsHandler()
-                        .newActionBar(StringUtils.format(zoneActionbar.replace("%time%", TimeUtils.fancyTime(timeUntilNext(player)))));
-                actionBar.send(player);
-            }
-        }
+    private void handleNewPlayers(Set<Player> players) {
+        var ipLimit = CONFIG.getInt("zone-per-ip-limit", -1);
+        players.forEach(player -> {
+            if (cooldown.hasCooldown(player)) return;
 
-        int ipLimit = CONFIG.getInt("zone-per-ip-limit", -1);
-        // player entered
-        for (Player player : players) {
-            if (cooldown.hasCooldown(player)) continue;
-            if (ipLimit != -1 && zonePlayers.keySet().stream().filter(p1 -> p1.getAddress().getAddress() == player.getAddress().getAddress()).count() >= ipLimit) {
+            if (ipLimit != -1 && zonePlayers.keySet().stream()
+                    .filter(p -> Objects.equals(Objects.requireNonNull(p.getAddress()).getAddress(), player.getAddress().getAddress()))
+                    .count() >= ipLimit) {
                 MESSAGEUTILS.sendLang(player, "zone.ip-limit");
                 cooldown.addCooldown(player, 3_000L);
-                continue;
+                return;
             }
+
             msg.sendLang(player, "messages.entered", Map.of("%time%", TimeUtils.fancyTime(rewardSeconds * 1_000L)));
             zonePlayers.put(player, 0);
+        });
+    }
+
+    private void sendTitleAndActionbar(Player player, long timeUntilNext) {
+        var zoneTitle = settings.getString("in-zone.title", null);
+        var zoneSubTitle = settings.getString("in-zone.subtitle", null);
+
+        if (zoneTitle != null || zoneSubTitle != null) {
+            var title = NMSHandlers.getNmsHandler().newTitle(
+                    Optional.ofNullable(zoneTitle)
+                            .map(t -> StringUtils.format(t.replace("%time%", TimeUtils.fancyTime(timeUntilNext))))
+                            .orElse(Component.empty()),
+                    Optional.ofNullable(zoneSubTitle)
+                            .map(t -> StringUtils.format(t.replace("%time%", TimeUtils.fancyTime(timeUntilNext))))
+                            .orElse(Component.empty()),
+                    0, 10, 0
+            );
+            title.send(player);
+        }
+
+        Optional.ofNullable(settings.getString("in-zone.actionbar", null))
+                .filter(actionbar -> !actionbar.isBlank())
+                .ifPresent(actionbar -> {
+                    var actionBar = NMSHandlers.getNmsHandler().newActionBar(StringUtils.format(actionbar.replace("%time%", TimeUtils.fancyTime(timeUntilNext))));
+                    actionBar.send(player);
+                });
+    }
+
+    private void sendRewardMessages(Player player, List<Reward> rewardList, int newTime) {
+        var rewardMessages = settings.getStringList("messages.reward");
+        if (rewardMessages.isEmpty()) return;
+
+        var prefix = CONFIG.getString("prefix");
+        var first = true;
+        for (var message : rewardMessages) {
+            if (first) {
+                message = prefix + message;
+                first = false;
+            }
+            if (message.contains("%reward%")) {
+                for (Reward reward : rewardList) {
+                    player.sendMessage(StringUtils.formatToString(message, Map.of("%reward%", reward.getDisplay(), "%time%", TimeUtils.fancyTime(newTime * 1_000L))));
+                }
+            } else {
+                player.sendMessage(StringUtils.formatToString(message, Map.of("%time%", TimeUtils.fancyTime(newTime * 1_000L))));
+            }
         }
     }
 
     public long timeUntilNext(Player player) {
-        Integer time = zonePlayers.get(player);
-        if (time == null) return -1;
-        return rewardSeconds * 1_000L - (time % rewardSeconds) * 1_000L;
+        return Optional.ofNullable(zonePlayers.get(player))
+                .map(time -> rewardSeconds * 1_000L - (time % rewardSeconds) * 1_000L)
+                .orElse(-1L);
     }
 
     public List<Reward> giveRewards(Player player) {
-        final List<Reward> rewardList = new ArrayList<>();
-        if (rewards.isEmpty()) return rewardList;
-        final HashMap<Reward, Double> chances = new HashMap<>();
-        for (Reward reward : rewards) {
-            chances.put(reward, reward.getChance());
-        }
+        if (rewards.isEmpty()) return Collections.emptyList();
 
-        for (int i = 0; i < rollAmount; i++) {
-            Reward sel = RandomUtils.randomValue(chances);
-            rewardList.add(sel);
-            sel.run(player);
-        }
+        var rewardList = new ArrayList<Reward>();
+        var chances = rewards.stream()
+                .collect(Collectors.toMap(reward -> reward, Reward::getChance));
 
+        for (var i = 0; i < rollAmount; i++) {
+            var selectedReward = RandomUtils.randomValue(new HashMap<>(chances));
+            rewardList.add(selectedReward);
+            selectedReward.run(player);
+        }
         return rewardList;
     }
 
@@ -161,10 +172,7 @@ public class Zone {
         this.rollAmount = settings.getInt("roll-amount", 1);
 
         rewards.clear();
-        for (Map<Object, Object> map : settings.getMapList("rewards")) {
-            final Reward reward = new Reward(map);
-            rewards.add(reward);
-        }
+        settings.getMapList("rewards").forEach(map -> rewards.add(new Reward(map)));
 
         return true;
     }

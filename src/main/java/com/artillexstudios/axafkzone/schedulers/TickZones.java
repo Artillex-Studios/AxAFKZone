@@ -9,21 +9,19 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public class TickZones {
-    private static ScheduledExecutorService service = null;
+    private static ScheduledExecutorService service;
 
     public static void start() {
-        if (service != null) service.shutdown();
+        if (service != null && !service.isShutdown()) {
+            return;
+        }
 
         service = Executors.newSingleThreadScheduledExecutor();
         service.scheduleAtFixedRate(() -> {
             try {
-                for (Zone zone : Zones.getZones().values()) {
-                    zone.tick();
-                }
+                Zones.getZones().forEach((id, zone) -> zone.tick());
 
-                WandListeners.getSelections().forEach((player, selection) -> {
-                    selection.show(player);
-                });
+                WandListeners.getSelections().forEach((player, selection) -> selection.show(player));
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
@@ -31,7 +29,8 @@ public class TickZones {
     }
 
     public static void stop() {
-        if (service == null) return;
-        service.shutdown();
+        if (service != null && !service.isShutdown()) {
+            service.shutdown();
+        }
     }
 }
