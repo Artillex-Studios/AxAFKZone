@@ -1,59 +1,59 @@
 help:
-  - " "
-  - "<gradient:#FF8800:#CC0055><b>AxAFKZone</b></gradient> &#FF8855Help &7»"
-  - " &7- &f/axafkzone reload &7| &#FF8855Reload plugin"
-  - " &7- &f/axafkzone wand &7| &#FF8855Give wand"
-  - " &7- &f/axafkzone create <zone> &7| &#FF8855Create zone"
-  - " &7- &f/axafkzone delete <zone> &7| &#FF8855Delete zone"
-  - " &7- &f/axafkzone redefine <zone> &7| &#FF8855Redefine area of zone"
-  - " "
+- ' '
+- <gradient:#FF8800:#CC0055><b>AxAFKZone</b></gradient> &#FF8855Help &7»
+- ' &7- &f/axafkzone reload &7| &#FF8855Recarregar plug-ins'
+- ' &7- &f/axafkzone wand &7| &#FF8855Give wand'
+- ' &7- &f/axafkzone create <zone> &7| &#FF8855Criar zona'
+- ' &7- &f/axafkzone delete <zone> &7| &#FF8855Excluir zona'
+- ' &7- &f/axafkzone redefine <zone> &7| &#FF8855Redefinir área da zona'
+- ' '
 
 reload:
-  success: "&#33FF33Plugin successfully reloaded!"
-  failed: "&#FF3333Failed to reload the plugin! Something is wrong in the &f%file%&#FF3333 file, look in the console or use a yaml validator to fix the errors!"
+  success: '&#33FF33Plugin recarregado com sucesso!'
+  failed: '&#FF3333Falha ao recarregar o plugin! Algo está errado no &f%file%&#FF3333 arquivo, procure no console ou use um validador yaml para corrigir os erros!'
 
 time:
-  second: "s"
-  minute: "m"
-  hour: "h"
-  day: "d"
+  second: s
+  minute: m
+  hour: h
+  day: d
 
 selection-wand:
-  material: "GOLDEN_AXE"
-  name: "&#CC0055&lSELECTION WAND"
+  material: GOLDEN_AXE
+  name: '&#CC0055&lVARINHA DE SELEÇÃO'
   lore:
-    - " "
-    - "&#CC0055ʟᴇғᴛ ᴄʟɪᴄᴋ"
-    - " &7- &fSelect position #1"
-    - " "
-    - "&#CC0055ʀɪɢʜᴛ ᴄʟɪᴄᴋ"
-    - " &7- &fSelect position #2"
-    - " "
+  - ' '
+  - '&#CC0055CLIQUE ESQUERDO'
+  - ' &7- &fSelecione a posição #1'
+  - ' '
+  - '&#CC0055CLIQUE DIREITO'
+  - ' &7- &fSelecione a posição #2'
+  - ' '
 
 zone:
-  created: "&#FF8855You have created a zone named &#CC0055%name%&#FF8855!"
-  deleted: "&#FF8855You have deleted the zone named &#CC0055%name%&#FF8855!"
-  not-found: "&#FF8855Can't find zone named &#CC0055%name%&#FF8855!"
-  already-exists: "&#FF8855Zone with name &#CC0055%name% &#FF8855already exists!"
-  ip-limit: "&#FF8855You can not have any more accounts in this zone from your IP address."
-  redefined: "&#FF8855You have redefined the zone named &#CC0055%name%&#FF8855!"
+  created: '&#FF8855Você criou uma zona chamada &#CC0055%name%&#FF8855!'
+  deleted: '&#FF8855Você excluiu a zona chamada &#CC0055%name%&#FF8855!'
+  not-found: '&#FF8855Não é possível encontrar a zona nomeada &#CC0055%name%&#FF8855!'
+  already-exists: '&#FF8855Zona com nome &#CC0055%name% &#FF8855já existe!'
+  ip-limit: '&#FF8855Você não pode ter mais contas nesta zona a partir do seu endereço IP.'
+  redefined: '&#FF8855You have redefined the zone named &#CC0055%name%&#FF8855!'
 
 selection:
-  pos1: "&#FFBB00Selected &#CC0055POSITION #1 &7- &#DDDDDD%location%"
-  pos2: "&#FFBB00Selected &#CC0055POSITION #2 &7- &#DDDDDD%location%"
-  no-selection: "&#CC0055You must select 2 corners with /axafkzone wand to create a new zone!"
+  pos1: '&#FFBB00Selected &#CC0055POSITION #1 &7- &#DDDDDD%location%'
+  pos2: '&#FFBB00Selected &#CC0055POSITION #2 &7- &#DDDDDD%location%'
+  no-selection: '&#CC0055Você deve escolher 2 cantos com /axafkzone varinha para criar uma nova zona!'
 
 commands:
-  invalid-value: "&#FF0000Invalid parameter: &#BB0000%value%"
-  invalid-command: "&#FF0000Invalid command or subcommand!"
-  missing-argument: "&#FF0000Missing argument! You must specify a value for &#BB0000%value%&#FF0000."
-  no-permission: "&#FF0000You don't have permission to access this command!"
-  out-of-range: "&#FF0000The &#BB0000%number% &#FF0000must be between &#BB0000%min% &#FF0000and &#BB0000%max%&#FF0000!"
-  player-only: "&#FF0000You must be a player to use this command!"
-  invalid-player: "&#FF0000The player &#BB0000%player% &#FF0000can not be found!"
-  invalid-selector: "&#FF0000You can not use this selector in this command!"
+  invalid-value: '&#FF0000Parâmetros inválidos: &#BB0000%value%'
+  invalid-command: '&#FF0000Comando inválido or subcommand!'
+  missing-argument: '&#FF0000Faltam argumentos! Você deve especificar um valor para &#BB0000%value%&#FF0000.'
+  no-permission: '&#FF0000Você não tem permissão para acessar este comando!'
+  out-of-range: '&#FF0000o &#BB0000%number% &#FF0000deve estar entre &#BB0000%min% &#FF0000e &#BB0000%max%&#FF0000!'
+  player-only: '&#FF0000Você deve ser um jogador para usar este comando!'
+  invalid-player: '&#FF0000O jogador &#BB0000%player% &#FF0000não pode ser encontrado!'
+  invalid-selector: '&#FF0000Você não pode usar este seletor neste comando!'
 
-update-notifier: "&#FFAA77There is a new version of AxAFKZone available! &#DDDDDD(&#FFFFFFcurrent: &#FF0000%current% &#DDDDDD| &#FFFFFFlatest: &#00FF00%latest%&#DDDDDD)"
+update-notifier: '&#FFAA77Há uma nova versão do AxAFKZone disponível! &#DDDDDD(&#FFFFFFatual: &#FF0000%current% &#DDDDDD| &#FFFFFFmais recente.: &#00FF00%latest%&#DDDDDD)'
 
 # do not change this
 version: 1
