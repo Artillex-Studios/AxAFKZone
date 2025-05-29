@@ -6,6 +6,7 @@ import com.artillexstudios.axafkzone.utils.RandomUtils;
 import com.artillexstudios.axafkzone.utils.TimeUtils;
 import com.artillexstudios.axapi.config.Config;
 import com.artillexstudios.axapi.libs.boostedyaml.block.implementation.Section;
+import com.artillexstudios.axapi.scheduler.Scheduler;
 import com.artillexstudios.axapi.serializers.Serializers;
 import com.artillexstudios.axapi.utils.ActionBar;
 import com.artillexstudios.axapi.utils.BossBar;
@@ -14,6 +15,8 @@ import com.artillexstudios.axapi.utils.MessageUtils;
 import com.artillexstudios.axapi.utils.StringUtils;
 import com.artillexstudios.axapi.utils.Title;
 import net.kyori.adventure.text.Component;
+import org.bukkit.Bukkit;
+import org.bukkit.SoundCategory;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
@@ -117,8 +120,12 @@ public class Zone {
     }
 
     private void leave(Player player, Iterator<Map.Entry<Player, Integer>> it) {
-        if (player.isOnline())
+        if (player.isOnline()) {
             msg.sendLang(player, "messages.left", Map.of("%time%", TimeUtils.fancyTime(zonePlayers.get(player) * 1_000L)));
+            Scheduler.get().run(scheduledTask -> {
+                player.stopSound(SoundCategory.RECORDS);
+            });
+        }
         it.remove();
         BossBar bossBar = bossbars.remove(player);
         if (bossBar != null) bossBar.remove();
@@ -191,15 +198,58 @@ public class Zone {
     public List<Reward> rollAndGiveRewards(Player player) {
         final List<Reward> rewardList = new ArrayList<>();
         if (rewards.isEmpty()) return rewardList;
-        final HashMap<Reward, Double> chances = new HashMap<>();
+
+        final HashMap<Reward, Double> eligibleRewards = new HashMap<>();
         for (Reward reward : rewards) {
-            chances.put(reward, reward.getChance());
+            if (reward.getPermission() == null || player.hasPermission(reward.getPermission())) {
+                eligibleRewards.put(reward, reward.getChance());
+            }
         }
 
+        if (eligibleRewards.isEmpty()) {
+            MESSAGEUTILS.sendLang(player, "messages.no-eligible-rewards");
+            return rewardList;
+        }
+
+        boolean playedSound = false;
+        boolean spawnedParticle = false;
         for (int i = 0; i < rollAmount; i++) {
-            Reward sel = RandomUtils.randomValue(chances);
+            Reward sel = RandomUtils.randomValue(eligibleRewards);
             rewardList.add(sel);
             sel.run(player);
+
+            if (sel.isBroadcastEnabled()) {
+                Map<String, String> replacements = Map.of(
+                        "%player%", player.getName(),
+                        "%reward%", sel.getDisplay() != null ? sel.getDisplay() : "a reward"
+                );
+                for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+                    msg.sendLang(onlinePlayer, "messages.broadcast-received", replacements);
+                    msg.sendLang(Bukkit.getConsoleSender(), "messages.broadcast-received", replacements);
+                }
+            }
+
+            if (!playedSound && sel.isSoundEnabled() && sel.getSound() != null) {
+                Scheduler.get().run(scheduledTask -> {
+                    player.stopSound(SoundCategory.RECORDS);
+                    player.playSound(player.getLocation(), sel.getSound(), sel.getVolume(), sel.getPitch());
+                });
+                playedSound = true;
+            }
+            if (!spawnedParticle && sel.isParticleEnabled() && sel.getParticle() != null) {
+                Scheduler.get().run(scheduledTask -> {
+                    player.getWorld().spawnParticle(
+                            sel.getParticle(),
+                            player.getLocation().add(0, 1, 0),
+                            sel.getParticleCount(),
+                            sel.getParticleOffsetX(),
+                            sel.getParticleOffsetY(),
+                            sel.getParticleOffsetZ(),
+                            0
+                    );
+                });
+                spawnedParticle = true;
+            }
         }
 
         return rewardList;
