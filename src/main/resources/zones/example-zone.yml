@@ -35,7 +35,7 @@ roll-amount: 3
 # you can add as many rewards as you would like
 rewards:
   - chance: 50.0
-    display: '&#AAAAAA1x Iron Ingot'
+    display: "&#AAAAAA1x Iron Ingot"
     # Only players with this permission will be able to receive this reward
     # Set to "" if everyone should be able to receive this reward
     permission: ""
@@ -54,9 +54,9 @@ rewards:
       offset-y: 0.5
       offset-z: 0.5
     commands:
-      - give %player% iron_ingot 1
+      - "give %player% iron_ingot 1"
   - chance: 25.0
-    display: '&#88FFFF1x Diamond'
+    display: "&#88FFFF1x Diamond"
     permission: "axafkzone.vip"
     broadcast: false
     sound:
