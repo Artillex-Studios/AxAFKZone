@@ -1,6 +1,7 @@
 messages:
   entered: "&#FF8855You have entered the AFK zone! You will get a reward in &#CC0055%time%&#FF8855!"
   left: "&#FF8855You have left the AFK zone! You stayed here for &#CC0055%time%&#FF8855!"
+  broadcast-received: "&#FF8855Player &#CC0055%player% &#FF8855just received &#CC0055%reward% &#FF8855from the AFK zone (/warp afk)"
   # the %rewards% line will be duplicated for every reward given
   reward:
     - "&#FF8855You have waited for &#CC0055%time% &#FF8855and you have been rewarded:"
@@ -35,10 +36,41 @@ roll-amount: 3
 rewards:
   - chance: 50.0
     display: "&#AAAAAA1x Iron Ingot"
+    # Only players with this permission will be able to receive this reward
+    # Set to "" if everyone should be able to receive this reward
+    permission: ""
+    # Should it broadcast it if the player gets the reward?
+    broadcast: true
+    sound:
+      enabled: true
+      type: ENTITY_EXPERIENCE_ORB_PICKUP
+      volume: 0.8
+      pitch: 1.2
+    particle:
+      enabled: true
+      type: HEART
+      count: 10
+      offset-x: 0.5
+      offset-y: 0.5
+      offset-z: 0.5
     commands:
       - "give %player% iron_ingot 1"
   - chance: 25.0
     display: "&#88FFFF1x Diamond"
+    permission: "axafkzone.vip"
+    broadcast: false
+    sound:
+      enabled: false
+      type: ENTITY_EXPERIENCE_ORB_PICKUP
+      volume: 0.8
+      pitch: 1.2
+    particle:
+      enabled: true
+      type: HEART
+      count: 10
+      offset-x: 0.5
+      offset-y: 0.5
+      offset-z: 0.5
     items:
       - amount: 1
         material: diamond
