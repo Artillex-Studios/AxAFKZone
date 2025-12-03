@@ -34,8 +34,8 @@ public class Region {
         String permission = zone.getSettings().getString("permission");
         for (Player player : Bukkit.getOnlinePlayers()) {
             if (player.isDead()) continue;
-            if (!permission.isBlank() && !player.hasPermission(permission)) continue;
             if (!player.getWorld().equals(world)) continue;
+            if (!permission.isBlank() && !player.hasPermission(permission)) continue;
 
             final Location loc = player.getLocation();
 
