@@ -18,6 +18,7 @@ import com.artillexstudios.axapi.utils.Title;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
 
+import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -89,7 +90,7 @@ public class Zone {
         // player entered
         for (Player player : players) {
             if (cooldown.hasCooldown(player)) continue;
-            if (ipLimit != -1 && zonePlayers.keySet().stream().filter(p1 -> p1.getAddress().getAddress().equals(player.getAddress().getAddress())).count() >= ipLimit) {
+            if (ipLimit != -1 && countIPAccounts(player) >= ipLimit) {
                 MESSAGEUTILS.sendLang(player, "zone.ip-limit");
                 cooldown.addCooldown(player, 3_000L);
                 continue;
@@ -97,6 +98,21 @@ public class Zone {
 
             enter(player);
         }
+    }
+
+    private int countIPAccounts(Player player) {
+        InetSocketAddress address = player.getAddress();
+        int count = 0;
+        if (address == null) return count;
+        if (player.hasPermission("axafkzone.bypass.iplimit")) return count;
+        for (Player pl : zonePlayers.keySet()) {
+            if (pl.hasPermission("axafkzone.bypass.iplimit")) continue;
+            InetSocketAddress address2 = pl.getAddress();
+            if (address2 == null) continue;
+            if (!address2.getAddress().equals(address.getAddress())) continue;
+            count++;
+        }
+        return count;
     }
 
     private void enter(Player player) {

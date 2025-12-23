@@ -15,7 +15,7 @@ public class NumberUtils {
 
     public static void reload() {
         final String[] lang = CONFIG.getString("number-formatting.short", "en_US").split("_");
-        shortFormat = DecimalFormat.getCompactNumberInstance(new Locale(lang[0], lang[1]), NumberFormat.Style.SHORT);
+        shortFormat = DecimalFormat.getCompactNumberInstance(Locale.of(lang[0], lang[1]), NumberFormat.Style.SHORT);
 
         int mode = CONFIG.getInt("number-formatting.mode", 0);
         switch (mode) {
