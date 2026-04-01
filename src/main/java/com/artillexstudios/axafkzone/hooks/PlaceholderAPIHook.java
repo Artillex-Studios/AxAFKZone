@@ -46,13 +46,13 @@ public class PlaceholderAPIHook extends PlaceholderExpansion {
         }
 
         switch (params.toLowerCase()) {
-            case "en_zona":
-                return currentZone != null ? "Si" : "No";
+            case "in_zone":
+                return currentZone != null ? "true" : "false";
 
-            case "zona_actual":
+            case "current_zone":
                 return currentZone != null ? currentZone.getName() : "";
 
-            case "tiempo_transcurrido":
+            case "time_spent":
                 if (currentZone != null) {
                     Integer timeSpent = currentZone.getPlayerTime(p);
                     if (timeSpent != null) {
@@ -61,7 +61,7 @@ public class PlaceholderAPIHook extends PlaceholderExpansion {
                 }
                 return "0s";
 
-            case "tiempo_restante":
+            case "time_left":
                 if (currentZone != null) {
                     long timeLeft = currentZone.timeUntilNext(p);
                     if (timeLeft != -1) {
@@ -70,12 +70,12 @@ public class PlaceholderAPIHook extends PlaceholderExpansion {
                 }
                 return "0s";
 
-            case "barra_progreso":
-                String symbol = AxAFKZone.CONFIG.getString("placeholder-progress-bar.simbolo", "■");
-                int length = AxAFKZone.CONFIG.getInt("placeholder-progress-bar.longitud", 10);
-                String filledColor = AxAFKZone.CONFIG.getString("placeholder-progress-bar.color-completado", "&#00AAFF");
-                String unfilledColor = AxAFKZone.CONFIG.getString("placeholder-progress-bar.color-faltante", "&7");
-                String format = AxAFKZone.CONFIG.getString("placeholder-progress-bar.formato", "&a[ {bar} &a]");
+            case "progress_bar":
+                String symbol = AxAFKZone.CONFIG.getString("placeholder-progress-bar.symbol", "■");
+                int length = AxAFKZone.CONFIG.getInt("placeholder-progress-bar.length", 10);
+                String filledColor = AxAFKZone.CONFIG.getString("placeholder-progress-bar.filled-color", "&#00AAFF");
+                String unfilledColor = AxAFKZone.CONFIG.getString("placeholder-progress-bar.unfilled-color", "&7");
+                String format = AxAFKZone.CONFIG.getString("placeholder-progress-bar.format", "&a[ {bar} &a]");
 
                 StringBuilder bar = new StringBuilder();
 
@@ -104,6 +104,6 @@ public class PlaceholderAPIHook extends PlaceholderExpansion {
                 return com.artillexstudios.axapi.utils.StringUtils.formatToString(format.replace("{bar}", bar.toString()));
         }
 
-        return null; // Variable no reconocida
+        return null; // Variable not recognized
     }
 }
