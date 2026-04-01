@@ -282,4 +282,12 @@ public class Zone {
     public int getTicks() {
         return ticks;
     }
+
+    public Integer getPlayerTime(Player player) {
+        return zonePlayers.get(player);
+    }
+
+    public int getRewardSeconds() {
+        return rewardSeconds;
+    }
 }
