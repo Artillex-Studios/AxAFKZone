@@ -65,6 +65,10 @@ public final class AxAFKZone extends AxPlugin {
         metrics.start();
 
         if (CONFIG.getBoolean("update-notifier.enabled", true)) new UpdateNotifier(this, 6598);
+
+        if (getServer().getPluginManager().getPlugin("PlaceholderAPI") != null) {
+            new com.artillexstudios.axafkzone.hooks.PlaceholderAPIHook().register();
+        }
     }
 
     public void updateFlags() {

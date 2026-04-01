@@ -35,5 +35,15 @@ update-notifier:
   # if enabled, it will broadcast the update message to all players who have the <plugin-name>.update-notify permission
   on-join: true
 
+# Configuración visual de la barra de progreso de PlaceholderAPI
+# Los colores se parsean internamente con formato hexagonal/MiniMessage
+placeholder-progress-bar:
+  simbolo: "■"
+  longitud: 10
+  color-completado: "&#00AAFF"
+  color-faltante: "&7"
+  # variables disponibles: {bar} = Representa el símbolo de la barra generada
+  formato: "&a[ {bar} &a]"
+
 # do not change this
 version: 2
