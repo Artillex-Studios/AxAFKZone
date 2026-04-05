@@ -64,7 +64,8 @@ public final class AxAFKZone extends AxPlugin {
         metrics = new AxMetrics(this, 9);
         metrics.start();
 
-        if (CONFIG.getBoolean("update-notifier.enabled", true)) new UpdateNotifier(this, 6598);
+        UpdateNotifier.init(CONFIG, LANG);
+        if (CONFIG.getBoolean("update-notifier.enabled", true)) new UpdateNotifier();
     }
 
     public void updateFlags() {
