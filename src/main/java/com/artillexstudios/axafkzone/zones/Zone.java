@@ -219,8 +219,20 @@ public class Zone {
     public List<Reward> rollAndGiveRewards(Player player) {
         final List<Reward> rewardList = new ArrayList<>();
         if (rewards.isEmpty()) return rewardList;
-        final HashMap<Reward, Double> chances = new HashMap<>();
+
+        final List<Reward> pool = new ArrayList<>();
         for (Reward reward : rewards) {
+            if (reward.hasPermission()) {
+                if (player.hasPermission(reward.getPermission())) pool.add(reward);
+            } else {
+                pool.add(reward);
+            }
+        }
+
+        if (pool.isEmpty()) return rewardList;
+
+        final HashMap<Reward, Double> chances = new HashMap<>();
+        for (Reward reward : pool) {
             chances.put(reward, reward.getChance());
         }
 

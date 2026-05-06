@@ -17,6 +17,7 @@ public class Reward {
     private final List<ItemStack> items;
     private final double chance;
     private final String display;
+    private final String permission;
 
     public Reward(Map<Object, Object> str) {
         final List<String> commands = (List<String>) str.getOrDefault("commands", new ArrayList<>());
@@ -38,6 +39,7 @@ public class Reward {
         this.items = items;
         this.commands = commands;
         this.display = display;
+        this.permission = (String) str.getOrDefault("permission", null);
     }
 
     public List<String> getCommands() {
@@ -54,6 +56,14 @@ public class Reward {
 
     public String getDisplay() {
         return display;
+    }
+
+    public String getPermission() {
+        return permission;
+    }
+
+    public boolean hasPermission() {
+        return permission != null && !permission.isBlank();
     }
 
     public void run(Player player) {
