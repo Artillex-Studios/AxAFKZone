@@ -45,7 +45,12 @@ rewards:
     items:
       - amount: 1
         material: diamond
-
+  - chance: 25.0
+    permission: axafkzone.custom # players with the reward's permission get that reward instead of the default one
+    display: "&#88FFFF2x Diamond"
+    items:
+      - amount: 2
+        material: diamond
 zone:
   location1: "IF YOU SEE THIS, SOMETHING HAS GONE REALLY REALLY WRONG"
   location2: "YOU SHOULD PROBABLY CONTACT SUPPORT, UNLESS YOU ARE LOOKING IN THE DEFAULT FILE!"
