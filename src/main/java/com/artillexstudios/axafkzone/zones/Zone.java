@@ -226,8 +226,8 @@ public class Zone {
         for (Reward reward : rewards) {
             String permission = reward.getPermission();
             if (permission != null && !permission.isBlank() && !player.hasPermission(permission)) continue;
-            int minimumTime = reward.getMinimumTime();
-            if (time < minimumTime) continue;
+            if (time < reward.getMinimumTime()) continue;
+            if (time > reward.getMaximumTime()) continue;
             chances.put(reward, reward.getChance());
         }
         if (chances.isEmpty()) return rewardList;

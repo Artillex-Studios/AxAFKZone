@@ -39,14 +39,13 @@ rewards:
   - chance: 50.0
     # optional: reward permission, set to "" or remove to disable
     permission: ""
-    # optional: minimum time spent in the afk zone required to get this reward, in seconds
+    # optional: time spent in the afk zone required to get this reward, in seconds
     minimum-time: 0
+    maximum-time: 0
     display: "&#AAAAAA1x Iron Ingot"
     commands:
       - "give %player% iron_ingot 1"
   - chance: 25.0
-    permission: ""
-    minimum-time: 0
     display: "&#88FFFF1x Diamond"
     items:
       - amount: 1

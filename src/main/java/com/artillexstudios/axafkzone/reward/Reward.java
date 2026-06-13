@@ -17,6 +17,7 @@ public class Reward {
     private final List<ItemStack> items;
     private final String permission;
     private final int minimumTime;
+    private final int maximumTime;
     private final double chance;
     private final String display;
 
@@ -32,6 +33,7 @@ public class Reward {
         this.display = (String) str.getOrDefault("display", null);
         this.permission = (String) str.getOrDefault("permission", null);
         this.minimumTime = ((Number) str.getOrDefault("minimum-time", 0)).intValue();
+        this.maximumTime = ((Number) str.getOrDefault("maximum-time", Integer.MAX_VALUE)).intValue();
         this.chance = ((Number) str.getOrDefault("chance", 10D)).doubleValue();
         this.commands = (List<String>) str.getOrDefault("commands", new ArrayList<>());
     }
@@ -50,6 +52,10 @@ public class Reward {
 
     public int getMinimumTime() {
         return minimumTime;
+    }
+
+    public int getMaximumTime() {
+        return maximumTime;
     }
 
     public double getChance() {
