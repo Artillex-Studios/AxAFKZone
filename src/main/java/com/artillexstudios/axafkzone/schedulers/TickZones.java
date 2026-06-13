@@ -3,8 +3,8 @@ package com.artillexstudios.axafkzone.schedulers;
 import com.artillexstudios.axafkzone.listeners.WandListeners;
 import com.artillexstudios.axafkzone.zones.Zone;
 import com.artillexstudios.axafkzone.zones.Zones;
+import com.artillexstudios.axapi.executor.ExceptionReportingScheduledThreadPool;
 
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -14,7 +14,7 @@ public class TickZones {
     public static void start() {
         if (service != null) service.shutdown();
 
-        service = Executors.newSingleThreadScheduledExecutor();
+        service = new ExceptionReportingScheduledThreadPool(1);
         service.scheduleAtFixedRate(() -> {
             try {
                 for (Zone zone : Zones.getZones().values()) {

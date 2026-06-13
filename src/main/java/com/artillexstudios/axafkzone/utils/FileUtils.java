@@ -32,7 +32,7 @@ public class FileUtils {
     }
 
     public static void create(String zoneName, Selection selection) {
-        final Config config = new Config(new File(AxAFKZone.getInstance().getDataFolder(), "zones/" + zoneName + ".yml"), AxAFKZone.getInstance().getResource("zones/example-zone.yml"));
+        Config config = new Config(new File(AxAFKZone.getInstance().getDataFolder(), "zones/" + zoneName + ".yml"), AxAFKZone.getInstance().getResource("zones/example-zone.yml"));
         config.set("zone.location1", Serializers.LOCATION.serialize(selection.getPosition1()));
         config.set("zone.location2", Serializers.LOCATION.serialize(selection.getPosition2()));
         config.save();

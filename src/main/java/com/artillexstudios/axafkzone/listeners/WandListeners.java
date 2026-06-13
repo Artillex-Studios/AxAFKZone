@@ -10,21 +10,28 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
-import java.util.WeakHashMap;
 
 import static com.artillexstudios.axafkzone.AxAFKZone.MESSAGEUTILS;
 
 public class WandListeners implements Listener {
-    private static final WeakHashMap<Player, Selection> selections = new WeakHashMap<>();
+    private static final Map<Player, Selection> selections = new HashMap<>();
 
     @NotNull
-    public static WeakHashMap<Player, Selection> getSelections() {
+    public static Map<Player, Selection> getSelections() {
         return selections;
+    }
+
+    @EventHandler
+    public void onQuit(PlayerQuitEvent event) {
+        selections.remove(event.getPlayer());
     }
 
     @EventHandler

@@ -15,29 +15,25 @@ import java.util.Map;
 public class Reward {
     private final List<String> commands;
     private final List<ItemStack> items;
+    private final String permission;
+    private final int minimumTime;
     private final double chance;
     private final String display;
 
     public Reward(Map<Object, Object> str) {
-        final List<String> commands = (List<String>) str.getOrDefault("commands", new ArrayList<>());
-        final ArrayList<ItemStack> items = new ArrayList<>();
-        Number chance = (Number) str.get("chance");
-
-        var map = (List<Map<Object, Object>>) str.get("items");
-        if (map != null) {
-            final LinkedList<Map<Object, Object>> map2 = new LinkedList<>(map);
+        this.items = new ArrayList<>();
+        List<Map<Object, Object>> items = (List<Map<Object, Object>>) str.get("items");
+        if (items != null) {
+            LinkedList<Map<Object, Object>> map2 = new LinkedList<>(items);
             for (Map<Object, Object> it : map2) {
-                items.add(ItemBuilder.create(it).get());
+                this.items.add(ItemBuilder.create(it).get());
             }
         }
-
-        String display = null;
-        if (str.containsKey("display")) display = (String) str.get("display");
-
-        this.chance = chance.doubleValue();
-        this.items = items;
-        this.commands = commands;
-        this.display = display;
+        this.display = (String) str.getOrDefault("display", null);
+        this.permission = (String) str.getOrDefault("permission", null);
+        this.minimumTime = ((Number) str.getOrDefault("minimum-time", 0)).intValue();
+        this.chance = ((Number) str.getOrDefault("chance", 10D)).doubleValue();
+        this.commands = (List<String>) str.getOrDefault("commands", new ArrayList<>());
     }
 
     public List<String> getCommands() {
@@ -46,6 +42,14 @@ public class Reward {
 
     public List<ItemStack> getItems() {
         return items;
+    }
+
+    public String getPermission() {
+        return permission;
+    }
+
+    public int getMinimumTime() {
+        return minimumTime;
     }
 
     public double getChance() {

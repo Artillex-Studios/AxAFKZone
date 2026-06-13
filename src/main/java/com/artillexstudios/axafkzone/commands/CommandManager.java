@@ -10,6 +10,7 @@ import revxrsal.commands.bukkit.BukkitCommandHandler;
 import revxrsal.commands.exception.CommandErrorException;
 import revxrsal.commands.orphan.Orphans;
 
+import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
 
@@ -44,7 +45,10 @@ public class CommandManager {
     public static void reload() {
         handler.unregisterAllCommands();
 
-        handler.register(Orphans.path(CONFIG.getStringList("command-aliases").toArray(String[]::new)).handler(new Commands()));
+        List<String> aliases = CONFIG.getStringList("command-aliases");
+        if (!aliases.isEmpty()) {
+            handler.register(Orphans.path(aliases.toArray(String[]::new)).handler(new Commands()));
+        }
 
         handler.registerBrigadier();
     }

@@ -15,12 +15,11 @@ public enum Redefine {
     INSTANCE;
 
     public void execute(Player sender, Zone zone) {
-        if (!WandListeners.getSelections().containsKey(sender)) {
+        Selection sel = WandListeners.getSelections().remove(sender);
+        if (sel == null) {
             MESSAGEUTILS.sendLang(sender, "selection.no-selection", Collections.singletonMap("%name%", zone.getName()));
             return;
         }
-
-        final Selection sel = WandListeners.getSelections().remove(sender);
 
         if (sel.getPosition1() == null || sel.getPosition2() == null || !Objects.equals(sel.getPosition1().getWorld(), sel.getPosition2().getWorld())) {
             MESSAGEUTILS.sendLang(sender, "selection.no-selection", Collections.singletonMap("%name%", zone.getName()));

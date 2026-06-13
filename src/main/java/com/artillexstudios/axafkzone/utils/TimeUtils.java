@@ -9,10 +9,9 @@ import static com.artillexstudios.axafkzone.AxAFKZone.LANG;
 
 public class TimeUtils {
     public static @NotNull String fancyTime(long time) {
-
         if (time < 0) return "---";
 
-        final Duration remainingTime = Duration.ofMillis(time);
+        Duration remainingTime = Duration.ofMillis(time);
         long total = remainingTime.getSeconds();
         long days = total / 86400;
         long hours = (total % 86400) / 3600;

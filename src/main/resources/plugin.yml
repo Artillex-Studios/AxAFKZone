@@ -7,3 +7,17 @@ folia-supported: true
 permissions:
   axafkzone.bypass.iplimit:
     default: false
+  axafkzone.help:
+    default: op
+  axafkzone.wand:
+    default: op
+  axafkzone.create:
+    default: op
+  axafkzone.delete:
+    default: op
+  axafkzone.redefine:
+    default: op
+  axafkzone.reload:
+    default: op
+  axafkzone.tp:
+    default: op
