@@ -41,7 +41,7 @@ rewards:
     permission: ""
     # optional: time spent in the afk zone required to get this reward, in seconds
     minimum-time: 0
-    maximum-time: 0
+    maximum-time: 100000
     display: "&#AAAAAA1x Iron Ingot"
     commands:
       - "give %player% iron_ingot 1"
